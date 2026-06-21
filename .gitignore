@@ -1,0 +1,31 @@
+# ── .NET ──
+[Bb]in/
+[Oo]bj/
+*.user
+.vs/
+
+# ── Node / Angular ──
+node_modules/
+dist/
+.angular/
+npm-debug.log*
+
+# ── Playwright ──
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# ── Temp / scratch ──
+.smoke/
+shots-*.mjs
+
+# ── Secrets (never commit) ──
+*.azure-secrets.local
+.azure-secrets.local
+appsettings.*.local.json
+
+# ── OS / editor ──
+.DS_Store
+Thumbs.db
+*.swp

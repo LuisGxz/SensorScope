@@ -1,0 +1,22 @@
+# TimescaleDB (PostgreSQL + time-series) for SensorScope.
+# Port 5433 to avoid clashing with any other local Postgres.
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: sensorscope-tsdb
+    environment:
+      POSTGRES_PASSWORD: sensorscope
+      POSTGRES_DB: sensorscope
+    ports:
+      - "5433:5432"
+    volumes:
+      - sensorscope-tsdb-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sensorscope"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  sensorscope-tsdb-data:

@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* ── Design tokens (mockup 12-sensorscope · tokens 12) — control-room dark ──── */
+@theme {
+  --font-body: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --color-pit-950: #0a0e12;
+  --color-pit-900: #0e141a;
+  --color-pit-800: #141c24;
+  --color-pit-700: #1c2733;
+  --color-pit-600: #2a3947;
+  --color-pit-500: #3a4b5c;
+  --color-pit-400: #4c6275;
+  --color-pit-300: #6e8499;
+  --color-pit-200: #9db0c2;
+  --color-pit-100: #d2dde7;
+
+  --color-okg-500: #2ed573;
+  --color-okg-900: #0d2b1a;
+  --color-amb-500: #f0b232;
+  --color-amb-900: #33260b;
+  --color-crit-500: #ff4757;
+  --color-crit-900: #36121a;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    color-scheme: dark;
+  }
+  body {
+    @apply bg-pit-950 text-pit-100;
+  }
+  :focus-visible {
+    @apply outline-none ring-2 ring-okg-500/60 ring-offset-1 ring-offset-pit-950;
+  }
+  ::selection {
+    @apply bg-okg-500/30 text-white;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-pit-600) transparent;
+  }
+}
+
+@layer components {
+  .mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .kbd {
+    @apply inline-grid place-items-center min-w-[22px] h-[22px] px-1.5 rounded-md border border-pit-600 bg-pit-800 text-pit-200 font-mono tabular-nums text-[11px] font-semibold;
+  }
+}
+
+/* Slide-over panel entrance. */
+@keyframes slidein { from { transform: translateX(16px); opacity: 0 } to { transform: translateX(0); opacity: 1 } }
+
+/* Lucide icons sized by host width/height classes. */
+lucide-icon, lucide-angular { display: inline-flex; align-items: center; justify-content: center; }
+lucide-icon svg, lucide-angular svg { width: 100%; height: 100%; }
+
+/* Pulse when a fresh value arrives. */
+@keyframes pulse-data { 0% { opacity: 1 } 50% { opacity: .6 } 100% { opacity: 1 } }
+.pulse-data { animation: pulse-data 2s ease-in-out infinite; }
+
+/* Soft blink on critical cards. */
+@keyframes crit-blink {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,71,87,0); border-color: #FF4757 }
+  50% { box-shadow: 0 0 24px -6px rgba(255,71,87,.5); border-color: #FF6B78 }
+}
+.crit-blink { animation: crit-blink 1.8s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-data, .crit-blink { animation: none }
+}
