@@ -1,0 +1,1 @@
+import{a as n}from"./chunk-ZJMA2OTE.js";import{K as e,O as t}from"./chunk-UUOULDVZ.js";var o=class i{constructor(r){this.i18n=r}i18n;transform(r){return this.i18n.t(r)}static \u0275fac=function(p){return new(p||i)(e(n,16))};static \u0275pipe=t({name:"t",type:i,pure:!1})};export{o as a};
