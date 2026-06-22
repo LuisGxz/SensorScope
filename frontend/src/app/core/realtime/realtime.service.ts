@@ -1,50 +1,23 @@
-import { Injectable, inject, signal } from '@angular/core';
-import * as signalR from '@microsoft/signalr';
+import { Injectable, computed, inject } from '@angular/core';
 import { Subject } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { AuthService } from '../auth/auth.service';
 import { AlertDto, AlertResolvedDto, ReadingEventDto } from '../models/models';
+import { SimEngine } from '../sim/sim-engine';
 
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
 
-/** Wraps the SignalR monitor hub: connection lifecycle + live event streams. */
+/**
+ * Static demo: the realtime feed is driven by the in-browser simulator instead of a
+ * SignalR hub. Same public surface so the store/components are unchanged.
+ */
 @Injectable({ providedIn: 'root' })
 export class RealtimeService {
-  private readonly auth = inject(AuthService);
-  private connection?: signalR.HubConnection;
+  private readonly sim = inject(SimEngine);
 
-  readonly state = signal<ConnectionState>('disconnected');
-  readonly reading$ = new Subject<ReadingEventDto>();
-  readonly alertRaised$ = new Subject<AlertDto>();
-  readonly alertResolved$ = new Subject<AlertResolvedDto>();
+  readonly state = computed<ConnectionState>(() => (this.sim.running() ? 'connected' : 'disconnected'));
+  readonly reading$: Subject<ReadingEventDto> = this.sim.reading$;
+  readonly alertRaised$: Subject<AlertDto> = this.sim.alertRaised$;
+  readonly alertResolved$: Subject<AlertResolvedDto> = this.sim.alertResolved$;
 
-  async connect(): Promise<void> {
-    if (this.connection) return;
-    const connection = new signalR.HubConnectionBuilder()
-      .withUrl(environment.hubUrl, { accessTokenFactory: () => this.auth.getAccessToken() ?? '' })
-      .withAutomaticReconnect()
-      .configureLogging(signalR.LogLevel.Critical)
-      .build();
-
-    connection.on('ReadingReceived', (r: ReadingEventDto) => this.reading$.next(r));
-    connection.on('AlertRaised', (a: AlertDto) => this.alertRaised$.next(a));
-    connection.on('AlertResolved', (a: AlertResolvedDto) => this.alertResolved$.next(a));
-
-    connection.onreconnecting(() => this.state.set('reconnecting'));
-    connection.onreconnected(() => this.state.set('connected'));
-    connection.onclose(() => this.state.set('disconnected'));
-
-    this.connection = connection;
-    this.state.set('connecting');
-    try { await connection.start(); this.state.set('connected'); }
-    catch { this.state.set('disconnected'); }
-  }
-
-  async disconnect(): Promise<void> {
-    const c = this.connection;
-    if (!c) return;
-    this.connection = undefined;
-    this.state.set('disconnected');
-    try { await c.stop(); } catch { /* ignore */ }
-  }
+  async connect(): Promise<void> { this.sim.start(); }
+  async disconnect(): Promise<void> { /* keep the simulator running across views */ }
 }
